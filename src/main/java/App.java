@@ -1,3 +1,5 @@
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +16,8 @@ public class App {
         String weatherType = "daily";
         ArrayList<String> coordinates = new ArrayList<>(Arrays.asList("52.237049", "21.017532"));
         WeatherApiServer weatherApiServer = new WeatherApiServer(weatherType, coordinates);
-        WeatherApiServer.run();
+        JSONObject data = new JSONObject();
+        data = weatherApiServer.getWeatherData(weatherType);
+        System.out.println(data.toString());
     }
 }

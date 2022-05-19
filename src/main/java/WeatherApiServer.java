@@ -1,3 +1,12 @@
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -13,10 +22,11 @@ public class WeatherApiServer {
         WeatherApiServer.coordinates = coordinates;
     }
 
-    public static String setUrlString() {
-        StringBuilder urlString = new StringBuilder(String.format("https://api.openweathermap.org/data/2.5/onecall?lat=%s&lon=%s&exclude=", coordinates.get(0), coordinates.get(1)));
+    public static String setUrlString(String type) {
+        StringBuilder urlString = new StringBuilder(String.format("https://api.openweathermap.org/data/2.5/onecall?lat=%s&lon=%s&exclude=",
+                coordinates.get(0), coordinates.get(1)));
         for (int i = 0; i < types.size(); i++) {
-            if (!weatherType.equals(types.get(i))) {
+            if (!type.equals(types.get(i))) {
                 urlString.append(types.get(i));
 
                 if (i != types.size() - 1) {
@@ -29,8 +39,27 @@ public class WeatherApiServer {
         return urlString.toString();
     }
 
-    public static void run() {
-        String url = WeatherApiServer.setUrlString();
-        System.out.println(url);
+
+    public JSONObject getWeatherData(String type) {
+        String urlString = WeatherApiServer.setUrlString(type);
+        JSONObject resultData = new JSONObject();
+        try {
+            StringBuilder data = new StringBuilder();
+            URL url = new URL(urlString);
+            URLConnection connection = url.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                data.append(line);
+            }
+            reader.close();
+
+            resultData = new JSONObject(data.toString());
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return resultData;
     }
 }
+
