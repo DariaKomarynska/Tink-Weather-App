@@ -14,7 +14,6 @@ public class WeatherApiServer {
     final static private String apiKey = System.getenv("API_KEY");
     public static String weatherType;
     public static ArrayList<String> coordinates;
-    static final public ArrayList<String> types = new ArrayList<>(Arrays.asList("current", "minutely", "hourly", "daily", "alerts"));
 
 
     public WeatherApiServer(String weatherType, ArrayList<String> coordinates) {
@@ -22,18 +21,19 @@ public class WeatherApiServer {
         WeatherApiServer.coordinates = coordinates;
     }
 
-    public static String setUrlString(String type) {
+    public static String setUrlString(String newType) {
         StringBuilder urlString = new StringBuilder(String.format("https://api.openweathermap.org/data/2.5/onecall?lat=%s&lon=%s&exclude=",
                 coordinates.get(0), coordinates.get(1)));
-        for (int i = 0; i < types.size(); i++) {
-            if (!type.equals(types.get(i))) {
-                urlString.append(types.get(i));
-
-                if (i != types.size() - 1) {
+        int i = 0;
+        for (WeatherType wType : WeatherType.values()) {
+            if (!newType.equals(wType.getName())) {
+                urlString.append(wType.getName());
+                if (i != WeatherType.values().length - 1) {
                     urlString.append(",");
+
                 }
             }
-
+            i++;
         }
         urlString.append("&appid=").append(apiKey).append("&units=metric");
         return urlString.toString();
@@ -42,6 +42,7 @@ public class WeatherApiServer {
 
     public JSONObject getWeatherData(String type) {
         String urlString = WeatherApiServer.setUrlString(type);
+        System.out.println(urlString);
         JSONObject resultData = new JSONObject();
         try {
             StringBuilder data = new StringBuilder();
