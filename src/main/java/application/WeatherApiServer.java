@@ -1,3 +1,5 @@
+package application;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import static application.WeatherType.*;
 
 public class WeatherApiServer {
     final static private String apiKey = System.getenv("API_KEY");

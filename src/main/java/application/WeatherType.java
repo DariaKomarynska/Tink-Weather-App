@@ -1,3 +1,4 @@
+package application;
 
 public enum WeatherType {
     CURRENT("current"), MINUTELY("minutely"), HOURLY("hourly"), DAILY("daily"), ALERTS("alerts");

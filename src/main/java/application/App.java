@@ -1,3 +1,5 @@
+package application;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -33,23 +35,26 @@ public class App {
         final String inputWeatherType;
         final String inputCity;
 
-        PATH = "D:\\Weather\\WeatherApp\\src\\main\\java\\Cities";
-        inputWeatherType = "daily";
-        inputCity = "warsaw";
-
-        ArrayList<String> coordinates = readCoordinatesFromFile(PATH, inputCity);
-        if (!coordinates.isEmpty()) {
-            if (inputWeatherType.equals(WeatherType.HOURLY.getName())
-                    || inputWeatherType.equals(WeatherType.DAILY.getName())) {
-                WeatherApiServer weatherApiServer = new WeatherApiServer(inputWeatherType, coordinates);
-                weatherApiServer.printStatistics();
-            } else {
-                System.out.println("Invalid weather type. Try again!");
-            }
+        if (args.length != 3) {
+            System.out.println("Invalid number of arguments. Try again!\n");
         } else {
-            System.err.println("City is not available. Try again!");
-        }
+            PATH = args[0].toString();
+            inputWeatherType = args[1].toString();
+            inputCity = args[2].toString();
 
+            ArrayList<String> coordinates = readCoordinatesFromFile(PATH, inputCity);
+            if (!coordinates.isEmpty()) {
+                if (inputWeatherType.equals(WeatherType.HOURLY.getName())
+                        || inputWeatherType.equals(WeatherType.DAILY.getName())) {
+                    WeatherApiServer weatherApiServer = new WeatherApiServer(inputWeatherType, coordinates);
+                    weatherApiServer.printStatistics();
+                } else {
+                    System.out.println("Invalid weather type. Try again!");
+                }
+            } else {
+                System.err.println("City is not available. Try again!");
+            }
+        }
     }
 
 }
