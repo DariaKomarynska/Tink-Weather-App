@@ -39,7 +39,6 @@ public class WeatherApiServer {
 
     public JSONArray getWeatherDataByType() {
         String urlString = WeatherApiServer.setUrlString();
-        System.out.println(urlString);
         JSONObject allData;
         JSONArray specData = new JSONArray();
         try {
@@ -130,7 +129,7 @@ public class WeatherApiServer {
         ArrayList<Object> temperatures = getTemperatures();
         ArrayList<Double> result = new ArrayList<>();
         for (Object temp : temperatures) {
-            result.add((Double) temp);
+            result.add(Double.valueOf(temp.toString()));
         }
         return result;
     }
