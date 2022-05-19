@@ -14,7 +14,6 @@ public class WeatherApiServer {
     public static String weatherType;
     public static ArrayList<String> coordinates;
 
-
     public WeatherApiServer(String weatherType, ArrayList<String> coordinates) {
         WeatherApiServer.weatherType = weatherType;
         WeatherApiServer.coordinates = coordinates;
@@ -37,7 +36,6 @@ public class WeatherApiServer {
         urlString.append("&appid=").append(apiKey).append("&units=metric");
         return urlString.toString();
     }
-
 
     public JSONArray getWeatherDataByType() {
         String urlString = WeatherApiServer.setUrlString();
@@ -64,15 +62,14 @@ public class WeatherApiServer {
         return specData;
     }
 
-
-    public ArrayList<Double> getHourlyTemperatures() {
+    public ArrayList<Object> getTemperatures() {
         JSONArray allData = getWeatherDataByType();
-        ArrayList<Double> temperatures = new ArrayList<>();
+        ArrayList<Object> temperatures = new ArrayList<>();
         for (int i = 0; i < allData.length(); i++) {
-            Double temp = null;
+            Object temp = null;
             try {
-                JSONObject hourData = allData.getJSONObject(i);
-                temp = (Double) hourData.get("temp");
+                JSONObject tempData = allData.getJSONObject(i);
+                temp = tempData.get("temp");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -81,8 +78,7 @@ public class WeatherApiServer {
         return temperatures;
     }
 
-
-    public ArrayList<Double> getHourlyAllPoP() {
+    public ArrayList<Double> getAllPoP() {
         JSONArray allData = getWeatherDataByType();
         ArrayList<Double> allPoP = new ArrayList<>();
         for (int i = 0; i < allData.length(); i++) {
@@ -99,34 +95,69 @@ public class WeatherApiServer {
         return allPoP;
     }
 
+    public ArrayList<String> getDailyStatistics() {
+        final int DAYS = 7;
+        ArrayList<String> dataString = new ArrayList<>();
+        ArrayList<Object> temperatures = getTemperatures();
+        ArrayList<Double> allPoPs = getAllPoP();
+        double minTemp, maxTemp, avgTemp, pop;
+        List<Double> dailyTemps;
+        JSONObject jsonTemp;
+        String tempData;
+        if (temperatures.size() == allPoPs.size() &&
+                temperatures.size() >= DAYS) {
+            for (int i = 0; i < DAYS; i++) {
+                jsonTemp = (JSONObject) temperatures.get(i);
+                try {
+                    minTemp = jsonTemp.getDouble("min");
+                    maxTemp = jsonTemp.getDouble("max");
+                    dailyTemps = Arrays.asList(jsonTemp.getDouble("morn"), jsonTemp.getDouble("day"),
+                            jsonTemp.getDouble("eve"), jsonTemp.getDouble("night"));
+                    avgTemp = dailyTemps.stream().mapToDouble(d -> d).average().orElse(0.0);
+                    pop = allPoPs.get(i);
+                    tempData = "Day " + (i + 1) + ": \n";
+                    tempData += getStringData(minTemp, maxTemp, avgTemp, pop);
+                    dataString.add(tempData);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return dataString;
+    }
 
-    private double getHourlyMinTemp() {
-        ArrayList<Double> temperatures = getHourlyTemperatures();
+    public ArrayList<Double> getHourlyTemperaturesToDouble() {
+        ArrayList<Object> temperatures = getTemperatures();
+        ArrayList<Double> result = new ArrayList<>();
+        for (Object temp : temperatures) {
+            result.add((Double) temp);
+        }
+        return result;
+    }
+
+
+    private double getHourlyMinTemp(ArrayList<Double> temperatures) {
         return Collections.min(temperatures);
     }
 
-
-    private double getHourlyMaxTemp() {
-        ArrayList<Double> temperatures = getHourlyTemperatures();
+    private double getHourlyMaxTemp(ArrayList<Double> temperatures) {
         return Collections.max(temperatures);
     }
 
-
-    private double getHourlyAvgTemp() {
-        ArrayList<Double> temperatures = getHourlyTemperatures();
+    private double getHourlyAvgTemp(ArrayList<Double> temperatures) {
         return temperatures.stream().mapToDouble(d -> d).average().orElse(0.0);
     }
 
     private double getHourlyAvgPoP() {
-        ArrayList<Double> allPoP = getHourlyAllPoP();
+        ArrayList<Double> allPoP = getAllPoP();
         return allPoP.stream().mapToDouble(d -> d).average().orElse(0.0);
     }
 
-
     public String getHourlyStatistics() {
-        double minTemp = getHourlyMinTemp();
-        double maxTemp = getHourlyMaxTemp();
-        double avgTemp = getHourlyAvgTemp();
+        ArrayList<Double> temperatures = getHourlyTemperaturesToDouble();
+        double minTemp = getHourlyMinTemp(temperatures);
+        double maxTemp = getHourlyMaxTemp(temperatures);
+        double avgTemp = getHourlyAvgTemp(temperatures);
         double pop = getHourlyAvgPoP();
         return getStringData(minTemp, maxTemp, avgTemp, pop);
     }
@@ -146,9 +177,20 @@ public class WeatherApiServer {
             result = "Hourly statistics for next 48 hours: \n" + statistics;
 
         } else if (weatherType.equals(WeatherType.DAILY.getName())) {
-            result = "daily";
+            statistics = toStringDailyStatistics();
+            result = "Daily statistics for 7 days: \n" + statistics;
         }
         return result;
+    }
+
+    public String toStringDailyStatistics(){
+        ArrayList<String> statisticsDaily = getDailyStatistics();
+        StringBuilder result = new StringBuilder();
+        for (String dayWeather : statisticsDaily){
+            result.append(dayWeather);
+            result.append("\n");
+        }
+        return result.toString();
     }
 
     public void printStatistics() {
