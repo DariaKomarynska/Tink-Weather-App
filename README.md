@@ -4,7 +4,7 @@
 
 
 
-- Recruitment Task from Tink Company
+- Recruitment Task
 
 
 #### It is a terminal console Java application, integrated with OpenWeatherMap. 
